@@ -2,10 +2,10 @@
 /**
  * Resize images dinamically
  *
- * Usage:	nova_resize_thumbnail( get_post_thumbnail_id(), 600x500xcenter-center );
+ * Usage: nova_resize_thumbnail( get_post_thumbnail_id(), 600x500xcenter-center );
  *
- * Notes:	Width and Height are required, crop is optional
- *			If you input a single number such as 500 it will crop to 500x500
+ * Notes: Width and Height are required, crop is optional
+ *        If you input a single number such as 500 it will crop to 500x500
  *
  * @param  string $attach_id
  * @param  string $dims
