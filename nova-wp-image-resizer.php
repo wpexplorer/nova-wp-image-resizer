@@ -13,10 +13,6 @@
  * @since  1.0
  */
 function nova_resize_thumbnail( $attach_id, $dims = '' ) {
-	
-	if ( ! $attach_id ) {
-		return;
-	}
 
 	$dims = explode( 'x', $dims );
 	if ( isset( $dims[0] ) ) {
