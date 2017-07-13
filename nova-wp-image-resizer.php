@@ -92,11 +92,7 @@ function nova_resize_thumbnail( $attach_id, $dims = '' ) {
 	}
 
 	// Define intermediate size name
-	if ( $crop_suffix ) {
-		$int_size = NOVA()->get_theme_prefix() . '_' . $suffix;
-	} else {
-		$int_size = NOVA()->get_theme_prefix() . '_' . $suffix;
-	}
+	$int_size = 'nova_' . $suffix;
 
 	// Crop image
 	$editor = wp_get_image_editor( $path );
