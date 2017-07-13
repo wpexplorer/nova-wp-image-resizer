@@ -72,6 +72,11 @@ function nova_resize_thumbnail( $attach_id, $dims = '' ) {
 
 	}
 
+	// Retina can't be cropped to exactly 2x
+	if ( $retina && ( $dst_w !== $width || $dst_h !== $height ) ) {
+		return;
+	}
+
 	// Define crop suffix if custom crop is set
 	$crop_suffix = is_string( $crop ) ? $crop : '';
 
