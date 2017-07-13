@@ -14,6 +14,8 @@
  */
 function nova_resize_thumbnail( $attach_id, $dims = '' ) {
 
+	$retina_support = false; // Declare retina support
+
 	$dims = explode( 'x', $dims );
 	if ( isset( $dims[0] ) ) {
 		$count = count( $dims );
@@ -54,12 +56,14 @@ function nova_resize_thumbnail( $attach_id, $dims = '' ) {
 	$cropped_dims = image_resize_dimensions( $src[1], $src[2], $width, $height, $crop_array );
 
 	// Target image size dims
-	$dst_w = $cropped_dims[4];
-	$dst_h = $cropped_dims[5];
+	$dst_w = isset( $cropped_dims[4] ) ? $cropped_dims[4] : '';
+	$dst_h = isset( $cropped_dims[5] ) ? $cropped_dims[5] : '';
 
 	// If current image size is smaller or equal to target size return full image
-	if ( $cropped_dims[4] > $src[1] || $cropped_dims[5] > $src[2] ) {
+	if ( empty( $cropped_dims ) || $dst_w > $src[1] || $dst_h > $src[2] ) {
 		
+		if ( $retina ) return; // don't return original for retina images
+
 		return array(
 			'url'    => $src[0],
 			'width'  => $src[1],
@@ -72,27 +76,38 @@ function nova_resize_thumbnail( $attach_id, $dims = '' ) {
 	$crop_suffix = is_string( $crop ) ? $crop : '';
 
 	// Define suffix
-	$suffix = $dst_w . 'x' . $dst_h;
+	if ( $retina ) {
+		$suffix = $width / 2 . 'x' . $height / 2;
+	} else {
+		$suffix = $width . 'x' . $height;
+	}
 	$suffix = $crop_suffix ? $suffix . '-' . $crop_suffix : $suffix;
+	$suffix = $retina ? $suffix . '@2x' : $suffix;
 
 	// Get cropped path
 	$cropped_path = $path_no_ext . '-' . $suffix . $extension;
 
 	// Return chached image
+	// And try and generate retina if not created already
 	if ( file_exists( $cropped_path ) ) {
 
 		$new_path = str_replace( basename( $src[0] ), basename( $cropped_path ), $src[0] );
+
+		if ( ! $retina && $retina_support ) {
+			$retina_src = earth_resize_thumbnail( $attach_id, $dst_w*2, $dst_h*2, $crop, true );
+		}
 
 		return array(
 			'url'    => $new_path,
 			'width'  => $dst_w,
 			'height' => $dst_h,
+			'retina' => ! empty( $retina_src['url'] ) ? $retina_src['url'] : '',
 		);
 
 	}
 
 	// Define intermediate size name
-	$int_size = 'nova_' . $suffix;
+	$int_size = 'earth_' . $suffix;
 
 	// Crop image
 	$editor = wp_get_image_editor( $path );
@@ -108,6 +123,11 @@ function nova_resize_thumbnail( $attach_id, $dims = '' ) {
 
 			// Cropped image
 			$cropped_img = str_replace( basename( $src[0] ), basename( $new_path ), $src[0] );
+
+			// Generate retina version
+			if ( ! $retina && $retina_support ) {
+				$retina_src = earth_resize_thumbnail( $attach_id, $dst_w*2, $dst_h*2, $crop, true );
+			}
 
 			// Update meta
 			if ( is_array( $meta ) ) {
@@ -143,6 +163,7 @@ function nova_resize_thumbnail( $attach_id, $dims = '' ) {
 				'url'    => $cropped_img,
 				'width'  => $dst_w,
 				'height' => $dst_h,
+				'retina' => ! empty( $retina_src['url'] ) ? $retina_src['url'] : '',
 			);
 
 		}
