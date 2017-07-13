@@ -77,8 +77,21 @@ function nova_resize_thumbnail( $attach_id, $dims = '' ) {
 		return;
 	}
 
-	// Define crop suffix if custom crop is set
-	$crop_suffix = is_string( $crop ) ? $crop : '';
+	// Array of valid crop locations
+	$crop_locations = array(
+		'left-top',
+		'right-top',
+		'center-top',
+		'left-center',
+		'right-center',
+		'center-center',
+		'left-bottom',
+		'right-bottom',
+		'center-bottom',
+	);
+
+	// Define crop suffix if custom crop is set and valid
+	$crop_suffix = in_array( $crop, $crop_locations ) ? $crop : '';
 
 	// Define suffix
 	if ( $retina ) {
