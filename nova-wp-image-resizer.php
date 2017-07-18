@@ -8,32 +8,46 @@
  *        If you input a single number such as 500 it will crop to 500x500
  *
  * @param  string $attach_id
- * @param  string $dims
+ * @param  string|array $dims
+ * @param  bool $retina
  * @return array
- * @since  1.0
  */
-function nova_resize_thumbnail( $attach_id, $dims = '' ) {
+function nova_resize_thumbnail( $attach_id, $dims = '', $retina = false ) {
+	
+	if ( ! $attach_id ) {
+		return;
+	}
 
-	$retina_support = false; // Declare retina support
+	$retina_support = true;
 
-	$dims = explode( 'x', $dims );
-	if ( isset( $dims[0] ) ) {
-		$count = count( $dims );
-		if ( $count == 3 ) {
-			$width  = $dims[0];
-			$height = $dims[1];
-			$crop   = $dims[2];
-		} elseif ( $count == 2 ) {
-			$width  = $dims[0];
-			$height = $dims[1];
-			$crop   = true;
-		} elseif ( 1 === $count ) {
-			$width  = $dims[0];
-			$height = $dims[0];
-			$crop   = true;
-		} else {
-			return;
+	if ( is_array( $dims ) ) {
+
+		$width  = isset( $dims['width'] ) ? $dims['width'] : '';
+		$height = isset( $dims['height'] ) ? $dims['height'] : '';
+		$crop   = isset( $dims['crop'] ) ? $dims['crop'] : 'center-center';
+
+	} else {
+
+		$dims = explode( 'x', $dims );
+		if ( isset( $dims[0] ) ) {
+			$count = count( $dims );
+			if ( $count == 3 ) {
+				$width  = $dims[0];
+				$height = $dims[1];
+				$crop   = $dims[2];
+			} elseif ( $count == 2 ) {
+				$width  = $dims[0];
+				$height = $dims[1];
+				$crop   = true;
+			} elseif ( 1 === $count ) {
+				$width  = $dims[0];
+				$height = $dims[0];
+				$crop   = true;
+			} else {
+				return;
+			}
 		}
+
 	}
 
 	$width  = intval( $width );
@@ -112,7 +126,12 @@ function nova_resize_thumbnail( $attach_id, $dims = '' ) {
 		$new_path = str_replace( basename( $src[0] ), basename( $cropped_path ), $src[0] );
 
 		if ( ! $retina && $retina_support ) {
-			$retina_src = earth_resize_thumbnail( $attach_id, $dst_w*2, $dst_h*2, $crop, true );
+			$retina_dims = array(
+				'width'  => $dst_w*2,
+				'height' => $dst_h*2,
+				'crop'   => $crop
+			);
+			$retina_src = nova_resize_thumbnail( $attach_id, $retina_dims, true );
 		}
 
 		return array(
@@ -144,7 +163,12 @@ function nova_resize_thumbnail( $attach_id, $dims = '' ) {
 
 			// Generate retina version
 			if ( ! $retina && $retina_support ) {
-				$retina_src = earth_resize_thumbnail( $attach_id, $dst_w*2, $dst_h*2, $crop, true );
+				$retina_dims = array(
+					'width'  => $dst_w*2,
+					'height' => $dst_h*2,
+					'crop'   => $crop
+				);
+				$retina_src = nova_resize_thumbnail( $attach_id, $retina_dims, true );
 			}
 
 			// Update meta
