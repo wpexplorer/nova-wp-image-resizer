@@ -195,7 +195,7 @@ function nova_resize_thumbnail( $attach_id, $size = '', $retina = false ) {
 					);
 
 					// Update meta
-					wp_update_attachment_metadata( $attach_id, $meta );
+					update_post_meta( $attach_id, '_wp_attachment_metadata', $meta );
 
 				}
 
